@@ -70,9 +70,84 @@ void findS(vector<EnjoySport> training_examples) {
 	}
 }
 
-int main(int argc, char* argv[]) {
+bool create_example(string hypothesis[], string target_concept[]) {
+	string attributes[][2] = { {"Sunny", "Rainy"}, {"Warm", "Cold"}, {"Normal", "High"}, {"Strong", "Weak"}, {"Warm", "Cool"}, {"Same", "Change"} };
+	string example[] = {"0", "0", "0", "0", "0", "0", "1"};
+	
+	srand(time(NULL));
+	
+	for (int i = 0; i < sizeof(attributes)/sizeof(attributes[0]); i++) {
+		string temp = attributes[i][rand()%2];
+
+		if (target_concept[i] == "?") {
+			example[i] = temp;
+			continue;
+		}
+
+		else {
+			if (target_concept[i] != temp) {
+				return false;
+			}
+
+			else {
+				example[i] = temp;
+			}
+		}
+	}
+
+	for (int j = 0; j < sizeof(attributes)/sizeof(attributes[0]); j++) {
+		if (hypothesis[j] != example[j]) {
+			hypothesis[j] = "?";
+		}
+
+		if (hypothesis[j] != target_concept[j]) {
+			return false;
+		}
+	}
+
+	return true;
+
+}
+
+void findMinimum(vector<EnjoySport> training_examples) {
+	string hypothesis[] = {"0", "0", "0", "0", "0", "0", "0"};
+	string target_concept[] = {"Sunny", "Warm", "?", "?", "?", "?"};
 
 	
+	for (int i = 0; i < training_examples.size(); i++) {
+		vector<string> example = training_examples.at(i).dataset;
+
+		if (example.at(example.size() - 1) == "1") {
+
+			for (int j = 0; j < (sizeof(hypothesis)/sizeof(hypothesis[0])) - 1; j++) {
+				if (hypothesis[j] == "0") {
+					if (i == 0) {
+						hypothesis[j] = example.at(j);
+					}
+				}
+
+				else {
+					if (hypothesis[j] != example.at(j)) {
+						hypothesis[j] = "?";
+					}
+				}
+			}
+		}
+	}
+	
+
+	bool flag = false;
+
+	while (!flag) {
+		flag = create_example(hypothesis, target_concept);
+	}
+
+	cout << "Found it" << endl;
+
+}
+
+int main(int argc, char* argv[]) {
+
 	vector<EnjoySport> training_examples;
 	training_examples.push_back(EnjoySport("Sunny", "Warm", "Normal", "Strong", "Warm", "Same", "1"));
 	training_examples.push_back(EnjoySport("Sunny", "Warm", "High", "Strong", "Warm", "Same", "1"));
@@ -80,7 +155,10 @@ int main(int argc, char* argv[]) {
 	training_examples.push_back(EnjoySport("Sunny", "Warm", "High", "Strong", "Cool", "Change", "1"));
 
 	findS(training_examples);
-	cout << "Find-S algorithm running on training examples" << endl;
+	cout << "Find-S algorithm running on training examples" << endl << endl;
+
+	cout << "Find-Minimum running" << endl;
+	findMinimum(training_examples);
 
 	return 0;
 }
