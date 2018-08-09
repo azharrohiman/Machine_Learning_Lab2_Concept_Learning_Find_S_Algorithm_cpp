@@ -23,12 +23,9 @@ struct EnjoySport {
 	
 };
 
-void findS(vector<EnjoySport> training_examples) {
+void findS(vector<EnjoySport> training_examples, ofstream &output_file) {
 	string hypothesis[] = {"0", "0", "0", "0", "0", "0", "0"};
 	int trace_count = 0;
-
-	ofstream output_file;
-	output_file.open("output.txt");
 
 	for (int i = 0; i < training_examples.size(); i++) {
 		vector<string> example = training_examples.at(i).dataset;
@@ -70,7 +67,7 @@ void findS(vector<EnjoySport> training_examples) {
 	}
 }
 
-bool create_example(string hypothesis[], string target_concept[]) {
+bool create_example(string hypothesis[], string target_concept[], ofstream &output_file) {
 	string attributes[][2] = { {"Sunny", "Rainy"}, {"Warm", "Cold"}, {"Normal", "High"}, {"Strong", "Weak"}, {"Warm", "Cool"}, {"Same", "Change"} };
 	string example[] = {"0", "0", "0", "0", "0", "0", "1"};
 	
@@ -105,11 +102,23 @@ bool create_example(string hypothesis[], string target_concept[]) {
 		}
 	}
 
+	output_file << "Example required to match target concept: " << endl << endl;
+	output_file << "<";
+	for (int i = 0; i < (sizeof(example)/sizeof(example[0]) - 1); i++) {
+		if (i != (sizeof(example)/sizeof(example[0])) -2) {
+			output_file << example[i] << ", ";
+		}
+
+		else {
+			output_file << example[i] << ">" << endl << endl;
+		}
+	}
+
 	return true;
 
 }
 
-void findMinimum(vector<EnjoySport> training_examples) {
+void findMinimum(vector<EnjoySport> training_examples, ofstream &output_file) {
 	string hypothesis[] = {"0", "0", "0", "0", "0", "0", "0"};
 	string target_concept[] = {"Sunny", "Warm", "?", "?", "?", "?"};
 
@@ -137,13 +146,14 @@ void findMinimum(vector<EnjoySport> training_examples) {
 	
 
 	bool flag = false;
+	int count = 0;
 
 	while (!flag) {
-		flag = create_example(hypothesis, target_concept);
+		++count;
+		flag = create_example(hypothesis, target_concept, output_file);
 	}
 
-	cout << "Found it" << endl;
-
+	output_file << "Amount of examples needed to match target concept: " << count << endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -154,11 +164,16 @@ int main(int argc, char* argv[]) {
 	training_examples.push_back(EnjoySport("Rainy", "Cold", "High", "Strong", "Warm", "Change", "0"));
 	training_examples.push_back(EnjoySport("Sunny", "Warm", "High", "Strong", "Cool", "Change", "1"));
 
-	findS(training_examples);
+	ofstream output_file;
+	output_file.open("output.txt");
+
+	findS(training_examples, output_file);
 	cout << "Find-S algorithm running on training examples" << endl << endl;
 
-	cout << "Find-Minimum running" << endl;
-	findMinimum(training_examples);
+	output_file << endl;
+
+	cout << "Finding example to match target concept" << endl;
+	findMinimum(training_examples, output_file);
 
 	return 0;
 }
